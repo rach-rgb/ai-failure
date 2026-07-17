@@ -163,7 +163,7 @@
       display: grid;
       place-items: center;
       font-weight: 700;
-      background: radial-gradient(circle at 50% 28%, #ffffff 0 22%, #ecfdf5 23% 100%);
+      background: #ecfdf5;
       z-index: 3;
       color: var(--human);
       text-align: center;
@@ -179,14 +179,16 @@
       font-size: 14px;
     }
 
-    .node-content svg {
-      width: 62px;
-      height: 62px;
-      stroke: currentColor;
-      stroke-width: 2.2;
-      fill: none;
-      stroke-linecap: round;
-      stroke-linejoin: round;
+    .node-icon {
+      width: 72px;
+      height: 72px;
+      object-fit: contain;
+      display: block;
+    }
+
+    .ai-node .node-icon {
+      width: 78px;
+      height: 78px;
     }
 
     .person.left { left: 8%; top: 38%; }
@@ -402,7 +404,9 @@
       .person { width: 96px; height: 96px; }
       .person.left { left: 5%; top: 38%; }
       .person.right { right: 5%; top: 38%; }
+      .node-icon { width: 54px; height: 54px; }
       .ai-node { top: 36%; width: 118px; height: 118px; left: calc(50% - 59px); }
+      .ai-node .node-icon { width: 60px; height: 60px; }
       .line { top: calc(38% + 46px); }
       .direct-line { left: calc(5% + 96px); right: calc(5% + 96px); }
       .ai-line-left { left: calc(5% + 96px); width: calc(45% - 155px); }
@@ -452,27 +456,15 @@
         <div class="bubble polished" id="polishedBubble">AI 정제문: "답장이 늦어 불편하게 했다면 진심으로 미안해."</div>
         <div class="person left" aria-label="인간 A">
           <div class="node-content">
-            <svg viewBox="0 0 64 64" aria-hidden="true">
-              <circle cx="32" cy="18" r="9"></circle>
-              <path d="M20 53v-5c0-8 5.4-14 12-14s12 6 12 14v5"></path>
-              <path d="M24 42h16"></path>
-              <path d="M21 26c-4 1-7 4-8 8"></path>
-              <path d="M43 26c4 1 7 4 8 8"></path>
-              <path d="M17 55h30"></path>
-            </svg>
+
+            <img class="node-icon" src="./assets/human-node.png" alt="" aria-hidden="true">
             <span>인간 A</span>
           </div>
         </div>
         <div class="person right" aria-label="인간 B">
           <div class="node-content">
-            <svg viewBox="0 0 64 64" aria-hidden="true">
-              <circle cx="32" cy="18" r="9"></circle>
-              <path d="M20 53v-5c0-8 5.4-14 12-14s12 6 12 14v5"></path>
-              <path d="M24 42h16"></path>
-              <path d="M21 26c-4 1-7 4-8 8"></path>
-              <path d="M43 26c4 1 7 4 8 8"></path>
-              <path d="M17 55h30"></path>
-            </svg>
+
+            <img class="node-icon" src="./assets/human-node.png" alt="" aria-hidden="true">
             <span>인간 B</span>
           </div>
         </div>
@@ -481,20 +473,8 @@
         <div class="line ai-line-right"></div>
         <div class="ai-node" aria-label="AI 중재 시스템">
           <div class="node-content">
-            <svg viewBox="0 0 64 64" aria-hidden="true">
-              <rect x="10" y="12" width="44" height="32" rx="5"></rect>
-              <path d="M18 44h28"></path>
-              <path d="M25 54h14"></path>
-              <path d="M32 44v10"></path>
-              <path d="M24 30c0-5 3.6-9 8-9 4.6 0 8 3.8 8 8.5 0 3.5-1.8 5.8-4.5 7.5H28c-2.6-1.7-4-4-4-7z"></path>
-              <path d="M28 37v-5"></path>
-              <path d="M32 37v-8"></path>
-              <path d="M36 37v-5"></path>
-              <path d="M21 18h-5"></path>
-              <path d="M48 18h-5"></path>
-              <path d="M21 38h-5"></path>
-              <path d="M48 38h-5"></path>
-            </svg>
+
+            <img class="node-icon" src="./assets/ai-node.png" alt="" aria-hidden="true">
             <span>AI</span>
           </div>
         </div>
