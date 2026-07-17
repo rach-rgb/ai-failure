@@ -1,0 +1,667 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>토큰 공용어 시대: AI 중재 소통 시뮬레이션</title>
+  <style>
+    :root {
+      --ink: #17202a;
+      --muted: #5c6672;
+      --line: #d7dde5;
+      --paper: #f7f5ef;
+      --human: #0f766e;
+      --ai: #7c3aed;
+      --risk: #c2410c;
+      --safe: #2563eb;
+      --panel: #ffffff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: var(--paper);
+    }
+
+    main {
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+    }
+
+    header {
+      padding: 24px clamp(18px, 4vw, 48px) 12px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.68);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(28px, 4vw, 48px);
+      line-height: 1.08;
+      letter-spacing: 0;
+    }
+
+    .lead {
+      max-width: 860px;
+      margin: 10px 0 0;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.55;
+    }
+
+    .stage {
+      display: grid;
+      grid-template-columns: minmax(260px, 360px) 1fr;
+      gap: 24px;
+      padding: 24px clamp(18px, 4vw, 48px);
+    }
+
+    .controls,
+    .evidence {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 18px;
+    }
+
+    .controls h2,
+    .evidence h2 {
+      margin: 0 0 12px;
+      font-size: 18px;
+      line-height: 1.25;
+    }
+
+    .slider-row {
+      display: grid;
+      gap: 10px;
+      margin: 16px 0 18px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--ai);
+    }
+
+    .year {
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .readout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin: 12px 0 18px;
+    }
+
+    .metric {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      min-height: 86px;
+    }
+
+    .metric strong {
+      display: block;
+      font-size: 28px;
+      line-height: 1;
+      margin-bottom: 6px;
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .metric em {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-style: normal;
+      font-size: 11px;
+      line-height: 1.3;
+    }
+
+    .note {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    .visual {
+      position: relative;
+      min-height: 520px;
+      background: #ffffff;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .scene-label {
+      position: absolute;
+      left: 18px;
+      top: 16px;
+      z-index: 3;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .person {
+      position: absolute;
+      width: 128px;
+      height: 128px;
+      border-radius: 50%;
+      border: 3px solid rgba(15, 118, 110, 0.92);
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      background: radial-gradient(circle at 50% 28%, #ffffff 0 22%, #ecfdf5 23% 100%);
+      z-index: 3;
+      color: var(--human);
+      text-align: center;
+      padding: 14px;
+      box-shadow: 0 10px 26px rgba(15, 118, 110, 0.13);
+    }
+
+    .node-content {
+      display: grid;
+      gap: 6px;
+      place-items: center;
+      line-height: 1.1;
+      font-size: 14px;
+    }
+
+    .node-content svg {
+      width: 62px;
+      height: 62px;
+      stroke: currentColor;
+      stroke-width: 2.2;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .person.left { left: 8%; top: 38%; }
+    .person.right { right: 8%; top: 38%; }
+
+    .ai-node {
+      position: absolute;
+      width: 148px;
+      height: 148px;
+      border-radius: 18px;
+      border: 3px solid rgba(124, 58, 237, 0.92);
+      display: grid;
+      place-items: center;
+      left: calc(50% - 74px);
+      top: 34%;
+      background: linear-gradient(180deg, #ffffff 0%, #f5f3ff 100%);
+      color: var(--ai);
+      font-weight: 800;
+      z-index: 4;
+      transform: scale(var(--ai-scale, 0.55));
+      opacity: var(--ai-opacity, 0.55);
+      transition: transform 320ms ease, opacity 320ms ease;
+      text-align: center;
+      padding: 16px;
+      box-shadow: 0 12px 30px rgba(124, 58, 237, 0.15);
+    }
+
+    .line {
+      position: absolute;
+      height: 5px;
+      top: calc(38% + 62px);
+      transform-origin: left center;
+      border-radius: 100px;
+      transition: opacity 260ms ease, width 260ms ease;
+    }
+
+    .direct-line {
+      left: calc(8% + 128px);
+      right: calc(8% + 128px);
+      background: var(--human);
+      opacity: var(--direct-opacity, 0.8);
+      z-index: 1;
+    }
+
+    .ai-line-left {
+      left: calc(8% + 128px);
+      width: calc(42% - 202px);
+      background: var(--ai);
+      opacity: var(--ai-opacity, 0.55);
+      z-index: 2;
+    }
+
+    .ai-line-right {
+      right: calc(8% + 128px);
+      width: calc(42% - 202px);
+      background: var(--ai);
+      opacity: var(--ai-opacity, 0.55);
+      z-index: 2;
+    }
+
+    .bubble {
+      position: absolute;
+      max-width: 280px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: #fff;
+      font-size: 14px;
+      line-height: 1.45;
+      box-shadow: 0 8px 20px rgba(23, 32, 42, 0.08);
+      transition: opacity 260ms ease, transform 260ms ease;
+    }
+
+    .raw {
+      left: 9%;
+      top: 12%;
+      border-color: rgba(15, 118, 110, 0.45);
+      opacity: var(--raw-opacity, 1);
+    }
+
+    .polished {
+      right: 9%;
+      top: 12%;
+      border-color: rgba(124, 58, 237, 0.45);
+      opacity: var(--polished-opacity, 0.5);
+    }
+
+    .risk-box {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      bottom: 18px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      z-index: 5;
+    }
+
+    .risk-item {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: #fff;
+      min-height: 92px;
+    }
+
+    .risk-item b {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
+
+    .bar {
+      height: 8px;
+      border-radius: 100px;
+      background: #e5e7eb;
+      overflow: hidden;
+      margin: 8px 0;
+    }
+
+    .bar i {
+      display: block;
+      height: 100%;
+      width: var(--value, 20%);
+      background: var(--risk);
+      transition: width 300ms ease;
+    }
+
+    .risk-item span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .evidence {
+      margin: 0 clamp(18px, 4vw, 48px) 24px;
+    }
+
+    .evidence-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .source-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: #fbfbf9;
+      min-height: 118px;
+    }
+
+    .source-card b {
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .source-card p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.42;
+    }
+
+    .source-card a {
+      color: var(--safe);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(37, 99, 235, 0.35);
+    }
+
+    .source-card a:hover {
+      border-bottom-color: var(--safe);
+    }
+
+    .footnote {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.42;
+      margin-top: 8px;
+    }
+
+    .source-note {
+      display: block;
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.42;
+    }
+
+    sup a,
+    .source-note a {
+      color: var(--safe);
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    sup a:hover,
+    .source-note a:hover {
+      text-decoration: underline;
+    }
+
+    footer {
+      padding: 12px clamp(18px, 4vw, 48px) 24px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    @media (max-width: 900px) {
+      .stage { grid-template-columns: 1fr; }
+      .visual { min-height: 620px; }
+      .person { width: 96px; height: 96px; }
+      .person.left { left: 5%; top: 38%; }
+      .person.right { right: 5%; top: 38%; }
+      .ai-node { top: 36%; width: 118px; height: 118px; left: calc(50% - 59px); }
+      .line { top: calc(38% + 46px); }
+      .direct-line { left: calc(5% + 96px); right: calc(5% + 96px); }
+      .ai-line-left { left: calc(5% + 96px); width: calc(45% - 155px); }
+      .ai-line-right { right: calc(5% + 96px); width: calc(45% - 155px); }
+      .risk-box { grid-template-columns: 1fr 1fr; }
+      .evidence-grid { grid-template-columns: 1fr; }
+      .bubble { max-width: 220px; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>토큰 공용어 시대</h1>
+      <p class="lead">2026년의 AI 문장 보조가 2036년의 AI 중재 소통으로 굳어지는 과정을 시각화했다. 소통은 더 부드러워지지만 원문, 감정, 의도, 책임의 일부가 인간 밖으로 이동한다.</p>
+    </header>
+
+    <section class="stage" aria-label="AI 중재 소통 시뮬레이션">
+      <aside class="controls">
+        <h2>연도별 소통 변화</h2>
+        <div class="slider-row">
+          <input id="yearSlider" type="range" min="2026" max="2036" value="2026" step="1" aria-label="연도 선택">
+          <div class="year">
+            <span>2026</span>
+            <strong id="yearLabel">2026</strong>
+            <span>2036</span>
+          </div>
+        </div>
+        <div class="readout">
+          <div class="metric">
+            <strong id="directScore">90%</strong>
+            <span>직접 발화 능력</span>
+            <em>100점 환산: AI 없이 말하고 듣는 역량</em>
+          </div>
+          <div class="metric">
+            <strong id="aiScore">10%</strong>
+            <span>AI 중재율</span>
+            <em>전체 소통 중 AI가 문장·감정·의도를 조정하는 비율</em>
+          </div>
+        </div>
+        <p id="stageText" class="note">AI는 문장을 다듬는 보조 도구다. 인간의 원문과 책임은 아직 비교적 선명하다.</p>
+      </aside>
+
+      <div class="visual" id="visual">
+        <div class="scene-label" id="sceneLabel">문장 위탁 단계</div>
+        <div class="bubble raw" id="rawBubble">원문: "미안해. 내가 너무 늦게 답했어."</div>
+        <div class="bubble polished" id="polishedBubble">AI 정제문: "답장이 늦어 불편하게 했다면 진심으로 미안해."</div>
+        <div class="person left" aria-label="인간 A">
+          <div class="node-content">
+            <svg viewBox="0 0 64 64" aria-hidden="true">
+              <circle cx="32" cy="18" r="9"></circle>
+              <path d="M20 53v-5c0-8 5.4-14 12-14s12 6 12 14v5"></path>
+              <path d="M24 42h16"></path>
+              <path d="M21 26c-4 1-7 4-8 8"></path>
+              <path d="M43 26c4 1 7 4 8 8"></path>
+              <path d="M17 55h30"></path>
+            </svg>
+            <span>인간 A</span>
+          </div>
+        </div>
+        <div class="person right" aria-label="인간 B">
+          <div class="node-content">
+            <svg viewBox="0 0 64 64" aria-hidden="true">
+              <circle cx="32" cy="18" r="9"></circle>
+              <path d="M20 53v-5c0-8 5.4-14 12-14s12 6 12 14v5"></path>
+              <path d="M24 42h16"></path>
+              <path d="M21 26c-4 1-7 4-8 8"></path>
+              <path d="M43 26c4 1 7 4 8 8"></path>
+              <path d="M17 55h30"></path>
+            </svg>
+            <span>인간 B</span>
+          </div>
+        </div>
+        <div class="line direct-line"></div>
+        <div class="line ai-line-left"></div>
+        <div class="line ai-line-right"></div>
+        <div class="ai-node" aria-label="AI 중재 시스템">
+          <div class="node-content">
+            <svg viewBox="0 0 64 64" aria-hidden="true">
+              <rect x="10" y="12" width="44" height="32" rx="5"></rect>
+              <path d="M18 44h28"></path>
+              <path d="M25 54h14"></path>
+              <path d="M32 44v10"></path>
+              <path d="M24 30c0-5 3.6-9 8-9 4.6 0 8 3.8 8 8.5 0 3.5-1.8 5.8-4.5 7.5H28c-2.6-1.7-4-4-4-7z"></path>
+              <path d="M28 37v-5"></path>
+              <path d="M32 37v-8"></path>
+              <path d="M36 37v-5"></path>
+              <path d="M21 18h-5"></path>
+              <path d="M48 18h-5"></path>
+              <path d="M21 38h-5"></path>
+              <path d="M48 38h-5"></path>
+            </svg>
+            <span>AI</span>
+          </div>
+        </div>
+        <div class="risk-box">
+          <div class="risk-item">
+            <b>문장 위탁</b>
+            <div class="bar"><i id="barWords"></i></div>
+            <span>말의 형태를 AI가 고른다.</span>
+          </div>
+          <div class="risk-item">
+            <b>감정 위탁</b>
+            <div class="bar"><i id="barEmotion"></i></div>
+            <span>감정의 세기를 AI가 조절한다.</span>
+          </div>
+          <div class="risk-item">
+            <b>의도 위탁</b>
+            <div class="bar"><i id="barIntent"></i></div>
+            <span>상대에게 보일 의도를 AI가 재구성한다.</span>
+          </div>
+          <div class="risk-item">
+            <b>책임 위탁</b>
+            <div class="bar"><i id="barResponsibility"></i></div>
+            <span>"내 말"의 경계가 흐려진다.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="evidence">
+      <h2>보완자료</h2>
+      <div class="evidence-grid">
+        <div class="source-card">
+          <b>코로나19 선행 사례</b>
+          <p>학교 폐쇄는 전 세계 16억 명 이상의 학습자에게 영향을 주었고<sup><a href="https://www.worldbank.org/en/topic/education/publication/the-state-of-the-global-education-crisis-a-path-to-recovery" target="_blank" rel="noreferrer">1</a></sup>, 대면 상호작용의 손실은 학생 정신건강과 학교 연결감 문제를 남겼다<sup><a href="https://www.cdc.gov/mmwr/volumes/71/su/su7103a3.htm" target="_blank" rel="noreferrer">2</a></sup>.</p>
+          <span class="source-note">출처: <a href="https://www.worldbank.org/en/topic/education/publication/the-state-of-the-global-education-crisis-a-path-to-recovery" target="_blank" rel="noreferrer">[1]</a> <a href="https://www.cdc.gov/mmwr/volumes/71/su/su7103a3.htm" target="_blank" rel="noreferrer">[2]</a></span>
+        </div>
+        <div class="source-card">
+          <b>AI 표현 위탁</b>
+          <p>이메일, 글쓰기, 개인 커뮤니케이션에서 AI 초안 작성과 톤 조절 기능이 이미 제품화되었고, 실제 ChatGPT 사용에서도 글쓰기와 실용 조언이 큰 비중을 차지한다<sup><a href="https://www.marketwatch.com/story/what-1-1-million-messages-say-about-how-chatgpt-is-actually-used-f96db90a" target="_blank" rel="noreferrer">3</a></sup>.</p>
+          <span class="source-note">출처: <a href="https://www.marketwatch.com/story/what-1-1-million-messages-say-about-how-chatgpt-is-actually-used-f96db90a" target="_blank" rel="noreferrer">[3]</a></span>
+        </div>
+        <div class="source-card">
+          <b>관계 메시지의 신뢰 위험</b>
+          <p>AI가 관계적 메시지를 대신 작성하면 발신자의 진정성 신호가 약해질 수 있고<sup><a href="https://arxiv.org/abs/2509.09645" target="_blank" rel="noreferrer">4</a></sup>, 민감한 관계 메시지에서도 생성형 AI 사용이 연구되고 있다<sup><a href="https://arxiv.org/abs/2401.09695" target="_blank" rel="noreferrer">5</a></sup>.</p>
+          <span class="source-note">출처: <a href="https://arxiv.org/abs/2509.09645" target="_blank" rel="noreferrer">[4]</a> <a href="https://arxiv.org/abs/2401.09695" target="_blank" rel="noreferrer">[5]</a></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="evidence">
+      <h2>대응 방안</h2>
+      <div class="evidence-grid">
+        <div class="source-card">
+          <b>AI 비매개 대화 교육</b>
+          <p>직접 듣기, 사과, 거절, 협상 훈련을 정규 활동으로 복원한다. 학교 연결감이 정신건강 보호 요인이라는 근거가 있어<sup><a href="https://www.cdc.gov/mmwr/volumes/71/su/su7103a3.htm" target="_blank" rel="noreferrer">2</a></sup>, AI 없는 상호작용을 교육과정 안에 남기는 것이 예방 효과를 가진다.</p>
+          <span class="source-note">출처: <a href="https://www.cdc.gov/mmwr/volumes/71/su/su7103a3.htm" target="_blank" rel="noreferrer">[2]</a></span>
+        </div>
+        <div class="source-card">
+          <b>AI 개입 표시제</b>
+          <p>"AI 초안 작성", "AI 감정 완화", "AI 의도 재구성"을 표시한다. AI가 쓴 관계적 메시지는 진정성 신호를 약하게 만들 수 있으므로<sup><a href="https://arxiv.org/abs/2509.09645" target="_blank" rel="noreferrer">4</a></sup>, 개입 표시가 신뢰 판단의 기준이 된다.</p>
+          <span class="source-note">출처: <a href="https://arxiv.org/abs/2509.09645" target="_blank" rel="noreferrer">[4]</a></span>
+        </div>
+        <div class="source-card">
+          <b>직접 발화권과 원문 보존권</b>
+          <p>채용, 평가, 의료, 돌봄처럼 책임이 큰 상황에는 직접 발화 구간과 AI 수정 전 원문을 남긴다. 이는 "내 말"과 "AI가 재구성한 말"의 경계를 보존해 책임 위탁을 줄인다<sup><a href="https://www.nist.gov/itl/ai-risk-management-framework" target="_blank" rel="noreferrer">6</a></sup>.</p>
+          <span class="source-note">출처: <a href="https://www.nist.gov/itl/ai-risk-management-framework" target="_blank" rel="noreferrer">[6]</a></span>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      이 애니메이션은 공모전 보완자료용 콘셉트 시각화입니다. 수치는 위험 방향을 설명하기 위한 지표화이며, 실제 근거 자료는 화면 하단 출처와 보완자료 문서에 정리했습니다.
+    </footer>
+  </main>
+
+  <script>
+    const slider = document.getElementById("yearSlider");
+    const root = document.documentElement;
+    const yearLabel = document.getElementById("yearLabel");
+    const directScore = document.getElementById("directScore");
+    const aiScore = document.getElementById("aiScore");
+    const stageText = document.getElementById("stageText");
+    const sceneLabel = document.getElementById("sceneLabel");
+    const rawBubble = document.getElementById("rawBubble");
+    const polishedBubble = document.getElementById("polishedBubble");
+
+    const bars = {
+      words: document.getElementById("barWords"),
+      emotion: document.getElementById("barEmotion"),
+      intent: document.getElementById("barIntent"),
+      responsibility: document.getElementById("barResponsibility")
+    };
+
+    const stages = [
+      {
+        until: 2027,
+        label: "문장 위탁 단계",
+        text: "AI는 문장을 다듬는 보조 도구다. 인간의 원문과 책임은 아직 비교적 선명하다.",
+        raw: "원문: \"미안해. 내가 너무 늦게 답했어.\"",
+        polished: "AI 정제문: \"답장이 늦어 불편하게 했다면 진심으로 미안해.\""
+      },
+      {
+        until: 2029,
+        label: "감정 위탁 단계",
+        text: "AI가 말투를 부드럽게 만들고 갈등 가능성을 낮춘다. 어색함과 침묵은 제거해야 할 오류처럼 취급된다.",
+        raw: "원문: \"그 말은 좀 상처였어.\"",
+        polished: "AI 정제문: \"방금 표현이 제게는 조금 어렵게 느껴졌어요.\""
+      },
+      {
+        until: 2032,
+        label: "의도 위탁 단계",
+        text: "AI가 상대의 성향과 맥락에 맞춰 의도를 재구성한다. 인간은 말하기 전에 번역된 자신을 먼저 검토한다.",
+        raw: "원문: \"나는 이번 결정에 반대해.\"",
+        polished: "AI 정제문: \"다른 관점에서 검토할 부분이 있어 보입니다.\""
+      },
+      {
+        until: 2034,
+        label: "책임 위탁 단계",
+        text: "내가 한 말과 AI가 전달한 말의 경계가 흐려진다. 발화의 책임은 점점 인터페이스 뒤로 이동한다.",
+        raw: "원문: \"나는 더 이상 이 관계를 지속하기 어려워.\"",
+        polished: "AI 정제문: \"서로의 회복을 위해 거리를 두는 시간이 필요할 것 같아요.\""
+      },
+      {
+        until: 2036,
+        label: "직접 발화 약화 단계",
+        text: "인간은 문장을 만들 수 있지만 직접 말하기를 위험하게 느낀다. 관계는 연결되어 있으나 서로의 불완전한 말은 사라진다.",
+        raw: "원문: \"안녕.\"",
+        polished: "AI 정제문: \"상대의 감정 상태를 분석 중입니다. 권장 발화를 생성합니다.\""
+      }
+    ];
+
+    function clamp(value, min, max) {
+      return Math.min(max, Math.max(min, value));
+    }
+
+    function update() {
+      const year = Number(slider.value);
+      const progress = (year - 2026) / 10;
+      const ai = Math.round(10 + progress * 82);
+      const direct = Math.round(90 - progress * 64);
+      const directOpacity = clamp(0.85 - progress * 0.68, 0.12, 0.85);
+      const aiOpacity = clamp(0.25 + progress * 0.72, 0.25, 0.97);
+      const aiScale = 0.55 + progress * 0.5;
+
+      yearLabel.textContent = String(year);
+      directScore.textContent = `${direct}%`;
+      aiScore.textContent = `${ai}%`;
+      root.style.setProperty("--direct-opacity", directOpacity.toFixed(2));
+      root.style.setProperty("--ai-opacity", aiOpacity.toFixed(2));
+      root.style.setProperty("--ai-scale", aiScale.toFixed(2));
+      root.style.setProperty("--raw-opacity", clamp(1 - progress * 0.78, 0.18, 1).toFixed(2));
+      root.style.setProperty("--polished-opacity", clamp(0.45 + progress * 0.55, 0.45, 1).toFixed(2));
+
+      const stage = stages.find(item => year <= item.until) || stages[stages.length - 1];
+      sceneLabel.textContent = stage.label;
+      stageText.textContent = stage.text;
+      rawBubble.textContent = stage.raw;
+      polishedBubble.textContent = stage.polished;
+
+      bars.words.style.setProperty("--value", `${Math.round(20 + progress * 75)}%`);
+      bars.emotion.style.setProperty("--value", `${Math.round(8 + progress * 82)}%`);
+      bars.intent.style.setProperty("--value", `${Math.round(4 + progress * 80)}%`);
+      bars.responsibility.style.setProperty("--value", `${Math.round(2 + progress * 74)}%`);
+    }
+
+    slider.addEventListener("input", update);
+    update();
+  </script>
+</body>
+</html>
